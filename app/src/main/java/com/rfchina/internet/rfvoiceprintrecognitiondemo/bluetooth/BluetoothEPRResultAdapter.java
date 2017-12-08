@@ -1,6 +1,8 @@
 package com.rfchina.internet.rfvoiceprintrecognitiondemo.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.ScanRecord;
+import android.os.ParcelUuid;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +21,10 @@ import java.util.List;
  * Created by luoyican on 2017/11/6.
  */
 
-public class BluetoothResultAdapter extends BaseAdapter {
+public class BluetoothEPRResultAdapter extends BaseAdapter {
     private List<BluetoothBean> datas;
 
-    public BluetoothResultAdapter(List<BluetoothBean> datas) {
+    public BluetoothEPRResultAdapter(List<BluetoothBean> datas) {
         Collections.sort(datas, new Comparator<BluetoothBean>() {
             @Override
             public int compare(BluetoothBean o1, BluetoothBean o2) {
@@ -90,10 +92,16 @@ public class BluetoothResultAdapter extends BaseAdapter {
     public static class BluetoothBean {
         private BluetoothDevice bluetoothDevice;
         private double distance;
+        private ScanRecord scanRecord;
 
         public BluetoothBean(BluetoothDevice bluetoothDevice, double distance) {
+            this(bluetoothDevice, distance, null);
+        }
+
+        public BluetoothBean(BluetoothDevice bluetoothDevice, double distance, ScanRecord scanRecord) {
             this.bluetoothDevice = bluetoothDevice;
             this.distance = distance;
+            this.scanRecord = scanRecord;//ble
         }
 
         public double getDistance() {
@@ -110,6 +118,14 @@ public class BluetoothResultAdapter extends BaseAdapter {
 
         public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
             this.bluetoothDevice = bluetoothDevice;
+        }
+
+        public ScanRecord getScanRecord() {
+            return scanRecord;
+        }
+
+        public void setScanRecord(ScanRecord scanRecord) {
+            this.scanRecord = scanRecord;
         }
     }
 

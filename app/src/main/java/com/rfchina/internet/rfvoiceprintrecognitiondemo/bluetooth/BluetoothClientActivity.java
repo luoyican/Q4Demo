@@ -172,6 +172,7 @@ public class BluetoothClientActivity extends Activity {
             if (device.getBondState() == BluetoothDevice.BOND_NONE) {
                 ClsUtils.createBond(device.getClass(), device);
             } else if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                showTip("配对成功,准备进行连接");
                 BluetoothSocketHelper mHelper = initBluetoothSocketHelper();
                 connetDevice(device, mHelper);
                 Log.d("dddd", "已经配对");
@@ -221,7 +222,7 @@ public class BluetoothClientActivity extends Activity {
         String imsi = mTm.getSubscriberId();
         String mtype = android.os.Build.MODEL; // 手机型号
 
-        return "imei:" + imei + "\nimsi:" + imsi + "\nmtype" + mtype;
+        return "imei:" + imei + "\nimsi:" + imsi + "\nmtype:" + mtype;
     }
 
 
@@ -283,6 +284,7 @@ public class BluetoothClientActivity extends Activity {
                         break;
                     case BluetoothDevice.BOND_BONDED:
                         Log.e("DDDDDDt", "配对成功");
+                        showTip("配对成功,准备进行连接");
                         BluetoothSocketHelper mHelper = initBluetoothSocketHelper();
                         connetDevice(device, mHelper);
                         break;

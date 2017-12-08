@@ -1,15 +1,20 @@
 package com.rfchina.internet.bluetoothserver;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.AdvertiseCallback;
+import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.AdvertiseSettings;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.TextView;
@@ -21,7 +26,10 @@ import com.xloong.library.bluesocket.message.IMessage;
 import com.xloong.library.bluesocket.message.ImageMessage;
 import com.xloong.library.bluesocket.message.StringMessage;
 
-public class BluetoothServerActivity extends Activity {
+import java.util.UUID;
+
+public class BluetoothERPServerActivity extends Activity {
+    private static final UUID UUID_SERVER = UUID.fromString("0000110B-0000-1000-8000-00805F9B34FB");
     private TextView txtResult;
     private String lastMsg = "";
     private Handler mHandler = new Handler();
@@ -51,12 +59,12 @@ public class BluetoothServerActivity extends Activity {
                     Log.d("DDDDD",msg);
                     setMsg(txtResult, msg.contains("YES"));
                     lastMsg = msg;
-//                    Toast.makeText(BluetoothServerActivity.this, ((StringMessage) message).getContent(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(BluetoothERPServerActivity.this, ((StringMessage) message).getContent(), Toast.LENGTH_SHORT).show();
 //                    if (!lastMsg.equals(msg)) {
 //
 //                    }
                 } else if (message instanceof ImageMessage) {
-                    Toast.makeText(BluetoothServerActivity.this, ((ImageMessage) message).getContent().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BluetoothERPServerActivity.this, ((ImageMessage) message).getContent().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -79,12 +87,44 @@ public class BluetoothServerActivity extends Activity {
             return;
         }
         bluetoothAdapter.setName("BLUTOOTHTEST");
+//        GATT(bluetoothAdapter);
         if (!bluetoothAdapter.isEnabled()) {//判断蓝牙是不是已经开启
             showTip("请先开启蓝牙功能");
             Log.d("dddd", "请先开启蓝牙功能");
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 0);
         }
+    }
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void GATT(BluetoothAdapter bluetoothAdapter){
+            AdvertiseSettings settings = new AdvertiseSettings.Builder()
+                    .setConnectable(true)
+                    .build();
+
+            AdvertiseData advertiseData = new AdvertiseData.Builder()
+                    .setIncludeDeviceName(true)
+                    .setIncludeTxPowerLevel(true)
+                    .build();
+
+            AdvertiseData scanResponseData = new AdvertiseData.Builder()
+                    .addServiceUuid(new ParcelUuid(UUID_SERVER))
+                    .setIncludeTxPowerLevel(true)
+                    .build();
+
+
+            AdvertiseCallback callback = new AdvertiseCallback() {
+
+                @Override
+                public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                    Log.d("dddd", "BLE advertisement added successfully");
+                }
+
+                @Override
+                public void onStartFailure(int errorCode) {
+                    Log.e("dddd", "Failed to add BLE advertisement, reason: " + errorCode);
+                }
+            };
+        bluetoothAdapter.getBluetoothLeAdvertiser().startAdvertising(settings,advertiseData,scanResponseData,callback);
     }
 
     private void enableBeDiscovery() {
@@ -101,7 +141,7 @@ public class BluetoothServerActivity extends Activity {
     }
 
     private void showTip(String s) {
-        Toast.makeText(BluetoothServerActivity.this, s, Toast.LENGTH_SHORT).show();
+        Toast.makeText(BluetoothERPServerActivity.this, s, Toast.LENGTH_SHORT).show();
     }
 
     private void setMsg(final TextView txtResult, final boolean isYes) {

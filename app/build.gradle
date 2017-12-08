@@ -5,8 +5,8 @@ android {
     buildToolsVersion "25.0.1"
     defaultConfig {
         applicationId "com.rfchina.internet.rfvoiceprintrecognitiondemo"
-        minSdkVersion 18
-        targetSdkVersion 25
+        minSdkVersion 22
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -35,4 +35,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     compile project(':library_bluesocket')
+    compile 'com.vise.xiaoyaoyou:baseble:2.0.4'
 }

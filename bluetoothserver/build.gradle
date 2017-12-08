@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "com.rfchina.internet.bluetoothserver"
-        minSdkVersion 19
-        targetSdkVersion 25
+        minSdkVersion 18
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
 

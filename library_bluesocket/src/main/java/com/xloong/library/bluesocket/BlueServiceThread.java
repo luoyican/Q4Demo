@@ -3,9 +3,11 @@ package com.xloong.library.bluesocket;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
+import android.util.Log;
 
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Service 端等待被连接的线程
@@ -37,12 +39,16 @@ public class BlueServiceThread extends BlueSocketBaseThread {
             mBlueServiceSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE, UUID_ANDROID_DEVICE);
             sendMessage(BlueSocketStatus.LISTENING);
             //监听连接,等待客户端连接,此处会阻塞线程,如果客户端没有连接服务端,此处一直会等待,知道有设备连接
-            mBlueSocket = mBlueServiceSocket.accept();
-            if (mBlueSocket != null) {
-                sendMessage(BlueSocketStatus.ACCEPTED);
-            } else {
-                sendMessage(BlueSocketStatus.DISCONNECTION);
+            while (true) {
+                mBlueSocket = mBlueServiceSocket.accept();
+                Log.e("dddd","请求连接");
+                if (mBlueSocket != null) {
+                    sendMessage(BlueSocketStatus.ACCEPTED);
+                } else {
+                    sendMessage(BlueSocketStatus.DISCONNECTION);
+                }
             }
+
         } catch (IOException e) {
             sendMessage(BlueSocketStatus.DISCONNECTION);
         }

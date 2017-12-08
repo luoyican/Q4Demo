@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.rfchina.internet.rfvoiceprintrecognitiondemo">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.rfchina.internet.rfvoiceprintrecognitiondemo"
+    >
 
     <!--连接网络权限，用于执行云端语音能力 -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -31,6 +33,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true"></uses-feature>
 
     <application
         android:name=".MyApplication"
@@ -39,14 +46,15 @@
         android:label="OKRQ4_LYC"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:label">
         <activity
             android:name=".MainActivity"
             >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+            <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN"/>-->
+            <!--<category android:name="android.intent.category.LAUNCHER"/>-->
+            <!--</intent-filter>-->
         </activity>
 
         <activity
@@ -56,16 +64,26 @@
             android:name=".VoiceprintWelcomeActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".bluetooth.BluetoothWelcomeActivity"
-            >
-        </activity>
-        <activity
-            android:screenOrientation="portrait"
             android:name=".bluetooth.BluetoothClientActivity"
+            android:screenOrientation="portrait"
             />
+        <activity
+            android:name=".bluetooth.BluetoothBLEClientActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".bluetooth.BluetoothBLEForClientActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".acousticWave.AcousticWaveActivity"
             android:screenOrientation="portrait"/>
+        <activity
+            android:name=".bluetooth.BLEActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

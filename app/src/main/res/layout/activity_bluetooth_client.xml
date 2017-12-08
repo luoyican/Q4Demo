@@ -22,7 +22,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="蓝牙识别"
+            android:text="经典蓝牙EDR识别"
             android:textSize="20dp"/>
     </LinearLayout>
 
