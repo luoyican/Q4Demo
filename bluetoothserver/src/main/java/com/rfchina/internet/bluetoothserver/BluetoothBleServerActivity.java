@@ -54,8 +54,6 @@ public class BluetoothBleServerActivity extends Activity {
     private Handler handler = new Handler();
     private String sendMsg = "yes";
 
-    private static boolean isStartAdvertising = false;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -171,10 +169,7 @@ public class BluetoothBleServerActivity extends Activity {
                 Log.e(TAG, "Failed to add BLE advertisement, reason: " + errorCode);
             }
         };
-        if (isStartAdvertising = false) {
             bluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, callback);
-            isStartAdvertising = true;
-        }
     }
 
     //关闭广播
@@ -182,7 +177,6 @@ public class BluetoothBleServerActivity extends Activity {
     private void stopGATTServer() {
         if (bluetoothLeAdvertiser != null && callback != null) {
             bluetoothLeAdvertiser.stopAdvertising(callback);
-            isStartAdvertising = false;
 //            Toast.makeText(BluetoothBleServerActivity.this, "准备关闭ble广播", Toast.LENGTH_LONG).show();
         }
     }

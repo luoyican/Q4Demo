@@ -3,6 +3,9 @@ package com.rfchina.internet.rfvoiceprintrecognitiondemo.bluetooth;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.ScanRecord;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -100,12 +103,13 @@ public class BLEActivity extends Activity {
                     List<ParcelUuid> uuids = scanRecord.getServiceUuids();
                     if (isContaind(uuids, uuidServer.toString())) {//&& scanRecord.getServiceData(uuid) != null&&!TextUtils.isEmpty(new String(scanRecord.getServiceData(uuid)))&&serverName.equals(new String(scanRecord.getServiceData(uuid)))
                         DeviceMirror deviceMirror = getDeviceMirror(connectedDevices, bluetoothLeDevice);
-                        if (deviceMirror != null && bluetoothLeDevice.getRssi() > -60) {
-                            Log.e("ddddd", "write " + bluetoothLeDevice.getName());
-                            write(deviceMirror);
+                        if (deviceMirror != null && bluetoothLeDevice.getRssi() > -80) {
+                            enableNotification(deviceMirror.getBluetoothGatt(), uuidServer, uuidCharRead);
+                            sendMsg(deviceMirror, "" + deviceMirror.getBluetoothLeDevice().getDevice().getName());
+                            recivedMsg(deviceMirror);
                         }
 
-                        if ( !isContain(mBluetoothDevices, bluetoothLeDevice)) {
+                        if (!isContain(mBluetoothDevices, bluetoothLeDevice)) {
                             Log.e("ddddd", "connect " + bluetoothLeDevice.getName());
                             mBluetoothDevices.add(bluetoothLeDevice);
                             connect(bluetoothLeDevice);
@@ -152,12 +156,56 @@ public class BLEActivity extends Activity {
         });
     }
 
-    private void write(DeviceMirror deviceMirror) {
-        sendMsg(deviceMirror, "" + deviceMirror.getBluetoothLeDevice().getDevice().getName());
-        recivedMsg(deviceMirror);
+    //只有明确设置setCharacteristicNotification才能收到通知
+    public boolean enableNotification(BluetoothGatt gatt, UUID serviceUUID, UUID characteristicUUID) {
+        boolean success = false;
+        BluetoothGattService service = gatt.getService(serviceUUID);
+        if (service != null) {
+            BluetoothGattCharacteristic characteristic = findNotifyCharacteristic(service, characteristicUUID);
+            if (characteristic != null) {
+                success = gatt.setCharacteristicNotification(characteristic, true);
+                if (success) {
+                    // 来源：http://stackoverflow.com/questions/38045294/oncharacteristicchanged-not-called-with-ble
+                    for (BluetoothGattDescriptor dp : characteristic.getDescriptors()) {
+                        if (dp != null) {
+                            if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+                                dp.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                            } else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
+                                dp.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+                            }
+                            gatt.writeDescriptor(dp);
+                        }
+                    }
+                }
+            }
+        }
+        return success;
+    }
+
+    private BluetoothGattCharacteristic findNotifyCharacteristic(BluetoothGattService service, UUID characteristicUUID) {
+        BluetoothGattCharacteristic characteristic = null;
+        List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
+        for (BluetoothGattCharacteristic c : characteristics) {
+            if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
+                    && characteristicUUID.equals(c.getUuid())) {
+                characteristic = c;
+                break;
+            }
+        }
+        if (characteristic != null)
+            return characteristic;
+        for (BluetoothGattCharacteristic c : characteristics) {
+            if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
+                    && characteristicUUID.equals(c.getUuid())) {
+                characteristic = c;
+                break;
+            }
+        }
+        return characteristic;
     }
 
     private void sendMsg(DeviceMirror deviceMirror, String msg) {
+        Log.e("ddddd", "write " + deviceMirror.getBluetoothLeDevice().getName());
         BluetoothGattChannel bluetoothGattChannel = new BluetoothGattChannel.Builder()
                 .setBluetoothGatt(deviceMirror.getBluetoothGatt())
                 .setPropertyType(PropertyType.PROPERTY_WRITE)
@@ -168,7 +216,7 @@ public class BLEActivity extends Activity {
         deviceMirror.bindChannel(new IBleCallback() {
             @Override
             public void onSuccess(byte[] data, BluetoothGattChannel bluetoothGattChannel, BluetoothLeDevice bluetoothLeDevice) {
-                Log.e("ddddd", "sendMsg");
+                Log.e("ddddd", "sendMsg " + new String(data));
             }
 
             @Override
@@ -204,13 +252,13 @@ public class BLEActivity extends Activity {
             @Override
             public void onSuccess(byte[] data, BluetoothGattChannel bluetoothGattChannel, BluetoothLeDevice bluetoothLeDevice) {
                 String msg = new String(data);
-                Log.e("eeeee2", "recivedMsg: " + msg);
-                setTxtResult(msg.contains("yes"));
+                Log.e("ddddd", "recivedMsg2: " + msg);
+                setTxtResult(msg.toLowerCase().contains("yes"));
             }
 
             @Override
             public void onFailure(BleException exception) {
-                Log.e("eeeee2", exception.toString());
+                Log.e("ddddd", exception.toString());
             }
         });
     }
@@ -258,7 +306,7 @@ public class BLEActivity extends Activity {
         for (String sb : hashMap.keySet()) {
             if (sb.equals(bean.getAddress())) {
                 deviceMirror = hashMap.get(sb);
-                Log.e("ddddd", "deviceMirror   " + deviceMirror);
+                Log.e("ddd", "deviceMirror   " + deviceMirror);
                 break;
             }
         }
