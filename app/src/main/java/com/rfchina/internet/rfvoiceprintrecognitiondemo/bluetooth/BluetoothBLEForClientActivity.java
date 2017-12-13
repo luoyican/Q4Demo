@@ -113,7 +113,6 @@ public class BluetoothBLEForClientActivity extends Activity {
 //            }
 //        }, 30 * 1000);
         bluetoothLeScanner.startScan(mLeScanCallback);//新
-
     }
 
     //停止搜索
@@ -231,6 +230,55 @@ public class BluetoothBLEForClientActivity extends Activity {
         characteristic4Write.setValue(msg);
         bluetoothGatt.writeCharacteristic(characteristic4Write);
     }
+
+    //只有明确设置setCharacteristicNotification才能收到通知
+    public boolean enableNotification(BluetoothGatt gatt, UUID serviceUUID, UUID characteristicUUID) {
+        boolean success = false;
+        BluetoothGattService service = gatt.getService(serviceUUID);
+        if (service != null) {
+            BluetoothGattCharacteristic characteristic = findNotifyCharacteristic(service, characteristicUUID);
+            if (characteristic != null) {
+                success = gatt.setCharacteristicNotification(characteristic, true);
+                if (success) {
+                    // 来源：http://stackoverflow.com/questions/38045294/oncharacteristicchanged-not-called-with-ble
+                    for (BluetoothGattDescriptor dp : characteristic.getDescriptors()) {
+                        if (dp != null) {
+                            if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+                                dp.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                            } else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
+                                dp.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+                            }
+                            gatt.writeDescriptor(dp);
+                        }
+                    }
+                }
+            }
+        }
+        return success;
+    }
+
+    private BluetoothGattCharacteristic findNotifyCharacteristic(BluetoothGattService service, UUID characteristicUUID) {
+        BluetoothGattCharacteristic characteristic = null;
+        List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
+        for (BluetoothGattCharacteristic c : characteristics) {
+            if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
+                    && characteristicUUID.equals(c.getUuid())) {
+                characteristic = c;
+                break;
+            }
+        }
+        if (characteristic != null)
+            return characteristic;
+        for (BluetoothGattCharacteristic c : characteristics) {
+            if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
+                    && characteristicUUID.equals(c.getUuid())) {
+                characteristic = c;
+                break;
+            }
+        }
+        return characteristic;
+    }
+
 
     class MyBluetoothGattCallback extends BluetoothGattCallback {
         private int time;

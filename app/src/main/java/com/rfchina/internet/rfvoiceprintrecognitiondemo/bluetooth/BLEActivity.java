@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -103,9 +102,10 @@ public class BLEActivity extends Activity {
                     List<ParcelUuid> uuids = scanRecord.getServiceUuids();
                     if (isContaind(uuids, uuidServer.toString())) {//&& scanRecord.getServiceData(uuid) != null&&!TextUtils.isEmpty(new String(scanRecord.getServiceData(uuid)))&&serverName.equals(new String(scanRecord.getServiceData(uuid)))
                         DeviceMirror deviceMirror = getDeviceMirror(connectedDevices, bluetoothLeDevice);
-                        if (deviceMirror != null && bluetoothLeDevice.getRssi() > -80) {
-                            enableNotification(deviceMirror.getBluetoothGatt(), uuidServer, uuidCharRead);
-                            sendMsg(deviceMirror, "" + deviceMirror.getBluetoothLeDevice().getDevice().getName());
+                        Log.e("dddddd", bluetoothLeDevice.getName() + "   " + RssiUtil.getDistance(bluetoothLeDevice.getRssi()) + " m");
+                        if (deviceMirror != null && RssiUtil.getDistance(bluetoothLeDevice.getRssi()) > -80) {
+                            enableNotification(deviceMirror.getBluetoothGatt(), uuidServer, uuidCharRead);//ios只接受通知的方式进行交互
+//                            sendMsg(deviceMirror, "" + deviceMirror.getBluetoothLeDevice().getDevice().getName());
                             recivedMsg(deviceMirror);
                         }
 
@@ -143,6 +143,7 @@ public class BLEActivity extends Activity {
             @Override
             public void onConnectFailure(BleException exception) {
                 Log.e("dddd", "" + exception.toString());
+                ViseBle.getInstance().disconnect(bluetoothLeDevice);
                 connectedDevices.remove(bluetoothLeDevice);
                 mBluetoothDevices.remove(bluetoothLeDevice);
             }
@@ -150,6 +151,7 @@ public class BLEActivity extends Activity {
             @Override
             public void onDisconnect(boolean isActive) {
                 Log.e("dddd", "onDisconnect");
+                ViseBle.getInstance().disconnect(bluetoothLeDevice);
                 connectedDevices.remove(bluetoothLeDevice);
                 mBluetoothDevices.remove(bluetoothLeDevice);
             }
@@ -252,7 +254,7 @@ public class BLEActivity extends Activity {
             @Override
             public void onSuccess(byte[] data, BluetoothGattChannel bluetoothGattChannel, BluetoothLeDevice bluetoothLeDevice) {
                 String msg = new String(data);
-                Log.e("ddddd", "recivedMsg2: " + msg);
+                Log.e("ddddd", "recivedMsg2: " + msg + "   data:" + data.length);
                 setTxtResult(msg.toLowerCase().contains("yes"));
             }
 

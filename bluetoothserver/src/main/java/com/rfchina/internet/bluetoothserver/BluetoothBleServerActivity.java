@@ -54,6 +54,8 @@ public class BluetoothBleServerActivity extends Activity {
     private Handler handler = new Handler();
     private String sendMsg = "yes";
 
+    private BluetoothDevice mBluetoothDevice;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,13 +72,22 @@ public class BluetoothBleServerActivity extends Activity {
         txtStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMsg = "yes";
+                sendMsg = "";
+                for (int i = 0; i < 155; i++) {
+                    sendMsg+="e";
+                }
+                characteristicRead.setValue(sendMsg.getBytes());
+                if (mBluetoothDevice != null)
+                    bluetoothGattServer.notifyCharacteristicChanged(mBluetoothDevice, characteristicRead, false);
             }
         });
         txtStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sendMsg = "no";
+                characteristicRead.setValue(sendMsg.getBytes());
+                if (mBluetoothDevice != null)
+                    bluetoothGattServer.notifyCharacteristicChanged(mBluetoothDevice, characteristicRead, false);
             }
         });
 
@@ -169,7 +180,7 @@ public class BluetoothBleServerActivity extends Activity {
                 Log.e(TAG, "Failed to add BLE advertisement, reason: " + errorCode);
             }
         };
-            bluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, callback);
+        bluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponseData, callback);
     }
 
     //关闭广播
@@ -187,10 +198,10 @@ public class BluetoothBleServerActivity extends Activity {
         BluetoothGattService service = new BluetoothGattService(UUID_SERVER, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
         //add a read characteristic.
-        characteristicRead = new BluetoothGattCharacteristic(UUID_CHARREAD, BluetoothGattCharacteristic.PROPERTY_READ, BluetoothGattCharacteristic.PERMISSION_READ);
+        characteristicRead = new BluetoothGattCharacteristic(UUID_CHARREAD, BluetoothGattCharacteristic.PROPERTY_READ|BluetoothGattCharacteristic.PROPERTY_NOTIFY, BluetoothGattCharacteristic.PERMISSION_READ);
         //add a descriptor
         BluetoothGattDescriptor descriptor = new BluetoothGattDescriptor(UUID_DESCRIPTOR, BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE);
-        descriptor.setValue("hehehe".getBytes());
+        descriptor.setValue("hehe".getBytes());
         characteristicRead.addDescriptor(descriptor);
         service.addCharacteristic(characteristicRead);
 
@@ -212,6 +223,11 @@ public class BluetoothBleServerActivity extends Activity {
             Log.e(TAG, String.format("1.onConnectionStateChange：device name = %s, address = %s", device.getName(), device.getAddress()));
             Log.e(TAG, String.format("1.onConnectionStateChange：status = %s, newState =%s ", status, newState));
             super.onConnectionStateChange(device, status, newState);
+            if (newState == BluetoothGatt.STATE_CONNECTED) {
+                mBluetoothDevice = device;
+            } else
+                mBluetoothDevice = null;
+
         }
 
         @Override
@@ -263,6 +279,7 @@ public class BluetoothBleServerActivity extends Activity {
         public void onNotificationSent(BluetoothDevice device, int status) {
             Log.e(TAG, String.format("5.onNotificationSent：device name = %s, address = %s", device.getName(), device.getAddress()));
             Log.e(TAG, String.format("5.onNotificationSent：status = %s", status));
+
         }
 
         @Override

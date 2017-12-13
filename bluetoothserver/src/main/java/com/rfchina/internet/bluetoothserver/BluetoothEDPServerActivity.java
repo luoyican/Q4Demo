@@ -28,7 +28,7 @@ import com.xloong.library.bluesocket.message.StringMessage;
 
 import java.util.UUID;
 
-public class BluetoothERPServerActivity extends Activity {
+public class BluetoothEDPServerActivity extends Activity {
     private static final UUID UUID_SERVER = UUID.fromString("0000110B-0000-1000-8000-00805F9B34FB");
     private TextView txtResult;
     private String lastMsg = "";
@@ -59,12 +59,12 @@ public class BluetoothERPServerActivity extends Activity {
                     Log.d("DDDDD",msg);
                     setMsg(txtResult, msg.contains("YES"));
                     lastMsg = msg;
-//                    Toast.makeText(BluetoothERPServerActivity.this, ((StringMessage) message).getContent(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(BluetoothEDPServerActivity.this, ((StringMessage) message).getContent(), Toast.LENGTH_SHORT).show();
 //                    if (!lastMsg.equals(msg)) {
 //
 //                    }
                 } else if (message instanceof ImageMessage) {
-                    Toast.makeText(BluetoothERPServerActivity.this, ((ImageMessage) message).getContent().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BluetoothEDPServerActivity.this, ((ImageMessage) message).getContent().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -95,37 +95,6 @@ public class BluetoothERPServerActivity extends Activity {
             startActivityForResult(enableBtIntent, 0);
         }
     }
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void GATT(BluetoothAdapter bluetoothAdapter){
-            AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                    .setConnectable(true)
-                    .build();
-
-            AdvertiseData advertiseData = new AdvertiseData.Builder()
-                    .setIncludeDeviceName(true)
-                    .setIncludeTxPowerLevel(true)
-                    .build();
-
-            AdvertiseData scanResponseData = new AdvertiseData.Builder()
-                    .addServiceUuid(new ParcelUuid(UUID_SERVER))
-                    .setIncludeTxPowerLevel(true)
-                    .build();
-
-
-            AdvertiseCallback callback = new AdvertiseCallback() {
-
-                @Override
-                public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                    Log.d("dddd", "BLE advertisement added successfully");
-                }
-
-                @Override
-                public void onStartFailure(int errorCode) {
-                    Log.e("dddd", "Failed to add BLE advertisement, reason: " + errorCode);
-                }
-            };
-        bluetoothAdapter.getBluetoothLeAdvertiser().startAdvertising(settings,advertiseData,scanResponseData,callback);
-    }
 
     private void enableBeDiscovery() {
         // 此方法使自身的蓝牙设备可以被其他蓝牙设备扫描到，
@@ -141,7 +110,7 @@ public class BluetoothERPServerActivity extends Activity {
     }
 
     private void showTip(String s) {
-        Toast.makeText(BluetoothERPServerActivity.this, s, Toast.LENGTH_SHORT).show();
+        Toast.makeText(BluetoothEDPServerActivity.this, s, Toast.LENGTH_SHORT).show();
     }
 
     private void setMsg(final TextView txtResult, final boolean isYes) {

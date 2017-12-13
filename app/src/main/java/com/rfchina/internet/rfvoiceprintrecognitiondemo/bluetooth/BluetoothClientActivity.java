@@ -18,7 +18,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -31,7 +30,6 @@ import com.xloong.library.bluesocket.message.StringMessage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by luoyican on 2017/11/16.
@@ -200,7 +198,7 @@ public class BluetoothClientActivity extends Activity {
                 Log.e("DDDDDDrss", "" + RssiUtil.getDistance(rssi));
                 if (rssi + 10 > 0) {
                     StringMessage message = new StringMessage();
-                    message.setContent(getInfo()+"\n"+sendMsg, "扩展信息");
+                    message.setContent(getInfo() + "\n" + sendMsg, "扩展信息");
                     mHelper.write(message);
                 }
             }
@@ -252,7 +250,7 @@ public class BluetoothClientActivity extends Activity {
                     String name = device.getName();
                     // 添加到结果
                     Log.d("ddddddd", "设备名:" + device.getName() + " 设备地址:" + device.getAddress());
-                    if (!TextUtils.isEmpty(name) && (name.contains("BLUTOOTHTEST") )) {//  |
+                    if (!TextUtils.isEmpty(name) && (name.contains("BLUTOOTHTEST"))) {//  |
                         toPairDevice(device);
                     }
                 }
